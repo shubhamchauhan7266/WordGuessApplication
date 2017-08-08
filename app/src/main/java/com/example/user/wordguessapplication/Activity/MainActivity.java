@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,12 +24,15 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private EditText mWord;
+    private final String TAG = MainActivity.class.getSimpleName();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        EditText etWord = (EditText) findViewById(R.id.et_word);
+        mWord = (EditText) findViewById(R.id.et_word);
         Button btCheck = (Button) findViewById(R.id.bt_check);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycleView);
 
@@ -41,8 +45,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         RecyclerAdapter recyclerAdapter = new RecyclerAdapter(mFeedsList);
         recyclerView.setAdapter(recyclerAdapter);
 
-        new CallbackTask().execute(inflections());
-
         btCheck.setOnClickListener(this);
     }
 
@@ -50,15 +52,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.bt_check:
+                new CallbackTask().execute(inflections(mWord.getText().toString()));
                 break;
             default:
                 break;
         }
     }
 
-    private String inflections() {
+    private String inflections(String word) {
         final String language = "en";
-        final String word = "Change";
         final String word_id = word.toLowerCase(); //word id is case sensitive and lowercase is required
         return "https://od-api.oxforddictionaries.com:443/api/v1/inflections/" + language + "/" + word_id;
     }
@@ -82,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
                 StringBuilder stringBuilder = new StringBuilder();
 
-                String line = null;
+                String line;
                 while ((line = reader.readLine()) != null) {
                     stringBuilder.append(line).append("\n");
                 }
@@ -90,16 +92,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 return stringBuilder.toString();
 
             } catch (Exception e) {
-                e.printStackTrace();
-                return e.toString();
+                return null;
             }
         }
 
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-
-            System.out.println(result);
+            if(result==null){
+                Log.d(TAG,"0");
+            }else
+            Log.d(TAG,"1");
         }
     }
 }

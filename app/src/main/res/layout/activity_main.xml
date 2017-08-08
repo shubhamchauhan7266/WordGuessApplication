@@ -52,10 +52,10 @@
                 android:textColor="@color/colorBlack" />
         </LinearLayout>
 
-        <view
+        <View
             android:layout_width="match_parent"
             android:layout_height="0.5dp"
-            android:layout_marginBottom="10dp" />
+            android:background="@color/borderGray"/>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recycleView"
