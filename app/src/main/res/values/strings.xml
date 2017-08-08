@@ -7,4 +7,7 @@
     <string name="check">Check</string>
     <string name="type_here">Type Here</string>
     <string name="error_validation_message">Not a Valid Word</string>
+    <string name="win_message">You Won the Game</string>
+    <string name="Lose_message">Sorry !!! You have Lost this Game</string>
+    <string name="valid_length_message">Please enter 4 character!!!</string>
 </resources>

@@ -1,6 +1,8 @@
 package com.example.user.wordguessapplication.Activity;
 
+import android.content.DialogInterface;
 import android.os.AsyncTask;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -20,6 +22,9 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -29,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private final String TAG = MainActivity.class.getSimpleName();
     private ArrayList<WordGuessModel> mFeedsList;
     private RecyclerAdapter mRecyclerAdapter;
+    private static int count = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,8 +61,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.bt_check:
+                if(mWord.getText().toString().trim().length()<4){
+                    alertShow((R.string.valid_length_message));
+                    return;
+                }
+
+                String word = mWord.getText().toString();
+                String[] wordArray=word.split("");
+                HashSet<String> set =new HashSet<>();
+                for (String singleChar : wordArray){
+                    if(singleChar.equals(""))
+                        continue;
+                    set.add(singleChar);
+                }
+
+                if(set.size()<4){
+                    alertShow(R.string.error_validation_message);
+                    mWord.setText("");
+                    return;
+                }
+
                 new CallbackTask().execute(inflections(mWord.getText().toString()));
-                mWord.setText("");
                 break;
             default:
                 break;
@@ -103,45 +128,76 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            if(result==null){
+            if (result == null) {
                 setData(false);
-                Log.d(TAG,"0");
-            }else{
+                Log.d(TAG, "0");
+            } else {
                 setData(true);
-                Log.d(TAG,"1");
+                Log.d(TAG, "1");
             }
         }
     }
 
     private void setData(boolean status) {
-        if(status){
-            String word=mWord.getText().toString();
+        if (status) {
+            String word = mWord.getText().toString();
             int bull = 0;
             int cow = 0;
-            String originalWord="luck";
-            String[] singleCharArray=originalWord.split("");
+            String originalWord = "luck";
+            String[] singleCharArray = originalWord.split("");
 
-            Log.d(TAG,String.valueOf("length = "+singleCharArray.length));
-
-            for(String singleChar:singleCharArray){
-                if(singleChar.equals(""))
+            for (String singleChar : singleCharArray) {
+                if (singleChar.equals(""))
                     continue;
-
-                if(word.contains(singleChar)){
-                    if(originalWord.indexOf(singleChar)==word.indexOf(singleChar)){
+                if (word.contains(singleChar)) {
+                    if (originalWord.indexOf(singleChar) == word.indexOf(singleChar)) {
                         bull++;
-                    }else {
+                    } else {
                         cow++;
                     }
                 }
-                Log.d(TAG,String.valueOf("bull ="+bull+" cow ="+cow+" char = "+singleChar));
             }
 
-            mFeedsList.add(new WordGuessModel(word,bull,cow));
+            count++;
+            mFeedsList.add(new WordGuessModel(word, bull, cow));
             mRecyclerAdapter.setmFeedItemList(mFeedsList);
             mRecyclerAdapter.notifyDataSetChanged();
-        }else {
-            Toast.makeText(this, R.string.error_validation_message, Toast.LENGTH_SHORT).show();
+            mWord.setText("");
+
+            if (bull == 4) {
+                alertShow(R.string.win_message);
+                mFeedsList.clear();
+                mRecyclerAdapter.setmFeedItemList(mFeedsList);
+                mRecyclerAdapter.notifyDataSetChanged();
+                count = 0;
+            } else if (count >= 15) {
+                alertShow(R.string.Lose_message);
+                mFeedsList.clear();
+                mRecyclerAdapter.setmFeedItemList(mFeedsList);
+                mRecyclerAdapter.notifyDataSetChanged();
+                count = 0;
+            }
+        } else {
+            alertShow(R.string.error_validation_message);
+            mWord.setText("");
         }
+    }
+
+    void alertShow(int message) {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+
+        alertDialog.setTitle("Alert Dialog");
+
+        alertDialog.setMessage(message);
+
+
+        alertDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        alertDialog.show();
     }
 }
