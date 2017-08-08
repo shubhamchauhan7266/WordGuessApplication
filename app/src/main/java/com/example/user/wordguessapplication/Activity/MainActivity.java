@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.bt_check:
                 if(mWord.getText().toString().trim().length()<4){
                     alertShow((R.string.valid_length_message));
+                    mWord.setText("");
                     return;
                 }
 
