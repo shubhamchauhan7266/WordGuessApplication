@@ -8,12 +8,12 @@ import java.io.Serializable;
  * Created by Shubham Chauhan on 8/8/17.
  */
 
-public class WordGuessModel implements Serializable{
+public class WordGuessModel implements Serializable {
     private String word;
-    private String bull;
-    private String cow;
+    private int bull;
+    private int cow;
 
-    public WordGuessModel(String word, String bull, String cow) {
+    public WordGuessModel(String word, int bull, int cow) {
         this.word = word;
         this.bull = bull;
         this.cow = cow;
@@ -23,24 +23,12 @@ public class WordGuessModel implements Serializable{
         return word;
     }
 
-    public void setWord(String word) {
-        this.word = word;
-    }
-
-    public String getBull() {
+    public int getBull() {
         return bull;
     }
 
-    public void setBull(String bull) {
-        this.bull = bull;
-    }
-
-    public String getCow() {
+    public int getCow() {
         return cow;
-    }
-
-    public void setCow(String cow) {
-        this.cow = cow;
     }
 
 }

@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.user.wordguessapplication.Models.WordGuessModel;
 import com.example.user.wordguessapplication.Adapters.RecyclerAdapter;
@@ -26,6 +27,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private EditText mWord;
     private final String TAG = MainActivity.class.getSimpleName();
+    private ArrayList<WordGuessModel> mFeedsList;
+    private RecyclerAdapter mRecyclerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,9 +44,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         DividerItemDecoration itemDecoration = new DividerItemDecoration(MainActivity.this, LinearLayoutManager.VERTICAL);
         recyclerView.addItemDecoration(itemDecoration);
 
-        ArrayList<WordGuessModel> mFeedsList = new ArrayList<>();
-        RecyclerAdapter recyclerAdapter = new RecyclerAdapter(mFeedsList);
-        recyclerView.setAdapter(recyclerAdapter);
+        mFeedsList = new ArrayList<>();
+        mRecyclerAdapter = new RecyclerAdapter(mFeedsList);
+        recyclerView.setAdapter(mRecyclerAdapter);
 
         btCheck.setOnClickListener(this);
     }
@@ -53,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (view.getId()) {
             case R.id.bt_check:
                 new CallbackTask().execute(inflections(mWord.getText().toString()));
+                mWord.setText("");
                 break;
             default:
                 break;
@@ -100,9 +104,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
             if(result==null){
+                setData(false);
                 Log.d(TAG,"0");
-            }else
-            Log.d(TAG,"1");
+            }else{
+                setData(true);
+                Log.d(TAG,"1");
+            }
+        }
+    }
+
+    private void setData(boolean status) {
+        if(status){
+            String word=mWord.getText().toString();
+            int bull = 0;
+            int cow = 0;
+            String originalWord="luck";
+            String[] singleCharArray=originalWord.split("");
+
+            Log.d(TAG,String.valueOf("length = "+singleCharArray.length));
+
+            for(String singleChar:singleCharArray){
+                if(singleChar.equals(""))
+                    continue;
+
+                if(word.contains(singleChar)){
+                    if(originalWord.indexOf(singleChar)==word.indexOf(singleChar)){
+                        bull++;
+                    }else {
+                        cow++;
+                    }
+                }
+                Log.d(TAG,String.valueOf("bull ="+bull+" cow ="+cow+" char = "+singleChar));
+            }
+
+            mFeedsList.add(new WordGuessModel(word,bull,cow));
+            mRecyclerAdapter.setmFeedItemList(mFeedsList);
+            mRecyclerAdapter.notifyDataSetChanged();
+        }else {
+            Toast.makeText(this, R.string.error_validation_message, Toast.LENGTH_SHORT).show();
         }
     }
 }

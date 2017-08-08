@@ -6,4 +6,5 @@
     <string name="cow">Cows</string>
     <string name="check">Check</string>
     <string name="type_here">Type Here</string>
+    <string name="error_validation_message">Not a Valid Word</string>
 </resources>

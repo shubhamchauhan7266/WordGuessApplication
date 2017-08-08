@@ -39,8 +39,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         WordGuessModel wordGuessModel = mFeedItemList.get(position);
         holder.tvSno.setText(String.valueOf(position));
         holder.tvWord.setText(wordGuessModel.getWord());
-        holder.tvBulls.setText(wordGuessModel.getBull());
-        holder.tvCows.setText(wordGuessModel.getCow());
+        holder.tvBulls.setText(String.valueOf(wordGuessModel.getBull()));
+        holder.tvCows.setText(String.valueOf(wordGuessModel.getCow()));
     }
 
     @Override
