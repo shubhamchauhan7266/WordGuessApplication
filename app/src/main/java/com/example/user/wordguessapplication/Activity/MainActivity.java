@@ -1,10 +1,11 @@
 package com.example.user.wordguessapplication.Activity;
 
 import android.content.DialogInterface;
+import android.content.res.AssetManager;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,17 +15,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.user.wordguessapplication.Models.WordGuessModel;
 import com.example.user.wordguessapplication.Adapters.RecyclerAdapter;
+import com.example.user.wordguessapplication.Models.WordGuessModel;
 import com.example.user.wordguessapplication.R;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -35,6 +35,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ArrayList<WordGuessModel> mFeedsList;
     private RecyclerAdapter mRecyclerAdapter;
     private static int count = 0;
+    private ArrayList<String> dictionary;
+    private String mOriginalWord;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +52,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         DividerItemDecoration itemDecoration = new DividerItemDecoration(MainActivity.this, LinearLayoutManager.VERTICAL);
         recyclerView.addItemDecoration(itemDecoration);
 
+        createDictionary();
+        mOriginalWord=getRandomWord();
         mFeedsList = new ArrayList<>();
         mRecyclerAdapter = new RecyclerAdapter(mFeedsList);
         recyclerView.setAdapter(mRecyclerAdapter);
@@ -144,14 +148,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String word = mWord.getText().toString();
             int bull = 0;
             int cow = 0;
-            String originalWord = "luck";
-            String[] singleCharArray = originalWord.split("");
+            String[] singleCharArray = mOriginalWord.split("");
 
             for (String singleChar : singleCharArray) {
                 if (singleChar.equals(""))
                     continue;
                 if (word.contains(singleChar)) {
-                    if (originalWord.indexOf(singleChar) == word.indexOf(singleChar)) {
+                    if (mOriginalWord.indexOf(singleChar) == word.indexOf(singleChar)) {
                         bull++;
                     } else {
                         cow++;
@@ -168,12 +171,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (bull == 4) {
                 alertShow(R.string.win_message);
                 mFeedsList.clear();
+                mOriginalWord=getRandomWord();
                 mRecyclerAdapter.setmFeedItemList(mFeedsList);
                 mRecyclerAdapter.notifyDataSetChanged();
                 count = 0;
             } else if (count >= 15) {
                 alertShow(R.string.Lose_message);
+                Toast.makeText(this, mOriginalWord, Toast.LENGTH_SHORT).show();
                 mFeedsList.clear();
+                mOriginalWord=getRandomWord();
                 mRecyclerAdapter.setmFeedItemList(mFeedsList);
                 mRecyclerAdapter.notifyDataSetChanged();
                 count = 0;
@@ -201,4 +207,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         alertDialog.show();
     }
+
+    //Set elsewhere
+
+    private void createDictionary(){
+        dictionary = new ArrayList<>();
+
+        BufferedReader dict = null; //Holds the dictionary file
+        AssetManager am = this.getAssets();
+
+        try {
+            //dictionary.txt should be in the assets folder.
+            dict = new BufferedReader(new InputStreamReader(am.open("words")));
+
+            String word;
+            while((word = dict.readLine()) != null){
+                int wordLength = 4;
+                if(word.length() == wordLength){
+                    dictionary.add(word);
+                }
+            }
+
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        try {
+            if(dict!=null)
+            dict.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    //Precondition: the dictionary has been created.
+    private String getRandomWord(){
+        return dictionary.get((int)(Math.random() * dictionary.size()));
+    }
+
 }
